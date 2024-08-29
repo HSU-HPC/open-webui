@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source ~/openwebui.venv/bin/activate
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "$SCRIPT_DIR" || exit
 
@@ -54,4 +56,8 @@ if [ -n "$SPACE_ID" ]; then
   export WEBUI_URL=${SPACE_HOST}
 fi
 
-WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY" exec uvicorn main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*'
+export CORS_ALLOW_ORIGIN="https://llm.hpc.hsu-hh.de"
+
+python https_redirect.py &
+
+WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY" exec uvicorn main:app --host "$HOST" --port 8081 --forwarded-allow-ips '*' --ssl-certfile="/home/acme/.acme.sh/llm.hpc.hsu-hh.de_ecc/fullchain.cer" --ssl-keyfile="/home/acme/.acme.sh/llm.hpc.hsu-hh.de_ecc/llm.hpc.hsu-hh.de.key"
